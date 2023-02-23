@@ -1,6 +1,5 @@
 import TabsView from '@/layouts/tabs/TabsView'
 import BlankView from '@/layouts/BlankView'
-import PageView from '@/layouts/PageView'
 
 // 路由配置
 const options = {
@@ -38,50 +37,30 @@ const options = {
       redirect: '/welcome',
       children: [
         {
-          path: 'dashboard',
-          name: 'Dashboard',
+          path: 'service',
+          name: 'service',
           meta: {
             icon: 'dashboard'
           },
           component: BlankView,
           children: [
             {
-              path: 'analysis',
-              name: '分析页',
-              component: () => import('@/pages/dashboard/analysis'),
+              path: 'course',
+              name: '进程报告',
+              component: () => import('@/pages/service/course'),
+            },
+            {
+              path: 'hardWare',
+              name: '硬件报告',
+              component: () => import('@/pages/service/hardWare'),
+            },
+            {
+              path: 'service',
+              name: '服务报告',
+              component: () => import('@/pages/service/service'),
             }
           ]
         },
-        {
-          path: 'list',
-          name: '列表页',
-          meta: {
-            icon: 'table'
-          },
-          component: PageView,
-          children: [
-            {
-              path: 'query',
-              name: '查询表格',
-              meta: {
-                authority: 'queryForm',
-              },
-              component: () => import('@/pages/list/QueryList'),
-            },
-          
-            {
-              path: 'primary',
-              name: '标准列表',
-              component: () => import('@/pages/list/StandardList'),
-            },
-            {
-              path: 'card',
-              name: '卡片列表',
-              component: () => import('@/pages/list/CardList'),
-            },
-          ]
-        },
-      
       ]
     },
   ]
