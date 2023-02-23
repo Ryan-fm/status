@@ -1,14 +1,9 @@
 <template>
   <common-layout>
-    <div class="top">
-      <div class="header">
-        <span class="title">{{systemName}}</span>
-      </div>
-    </div>
     <div class="login">
       <a-form @submit="onSubmit" :form="form">
         <a-tabs size="large" :tabBarStyle="{textAlign: 'center'}" style="padding: 0 2px;">
-          <a-tab-pane tab="账户密码登录" key="1">
+          <a-tab-pane tab="注册账户" key="1">
             <a-alert type="error" :closable="true" v-show="error" :message="error" showIcon style="margin-bottom: 24px;" />
             <a-form-item>
               <a-input
@@ -31,24 +26,35 @@
                 <a-icon slot="prefix" type="lock" />
               </a-input>
             </a-form-item>
+						<a-form-item>
+              <a-input
+                size="large"
+                placeholder="请输入确认密码"
+                autocomplete="autocomplete"
+                type="password"
+                v-decorator="['retype', {rules: [{ required: true, message: '请输入确认密码', whitespace: true},{
+                validator: compareToFirstPassword,
+              },]}]"
+              >
+                <a-icon slot="prefix" type="lock" />
+              </a-input>
+            </a-form-item>
           </a-tab-pane>
         </a-tabs>
         <a-form-item>
-          <a-button :loading="logging" style="width: 100%;margin-top: 24px" size="large" htmlType="submit" type="primary">登录</a-button>
+          <a-button :loading="logging" style="width: 100%;margin-top: 24px" size="large" htmlType="submit" type="primary">注册</a-button>
         </a-form-item>
-        <div>
-          <router-link style="float: right" to="/register">注册</router-link>
-        </div>
       </a-form>
+			<div>
+          <router-link style="float: right" to="/login">返回</router-link>
+        </div>
     </div>
   </common-layout>
 </template>
 
 <script>
 import CommonLayout from '@/layouts/CommonLayout'
-import {login, getRoutesConfig} from '@/services/user'
-import {setAuthorization} from '@/utils/request'
-import {loadRoutes} from '@/utils/routerUtil'
+import {register} from '@/services/user'
 import {mapMutations} from 'vuex'
 
 export default {
@@ -67,38 +73,32 @@ export default {
     }
   },
   methods: {
-    ...mapMutations('account', ['setUser', 'setPermissions', 'setRoles']),
+    ...mapMutations('account', ['setUser']),
     onSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err) => {
         if (!err) {
-          this.logging = true
-          const name = this.form.getFieldValue('name')
+					// 需要校验两次密码是否一致
+					const name = this.form.getFieldValue('name')
           const password = this.form.getFieldValue('password')
-          login(name, password).then(this.afterLogin)
+					const retype = this.form.getFieldValue('retype')
+					if(password === retype) { 
+						this.logging = true
+						register(name, password,retype).then(this.afterLogin)
+					} else {
+						1
+					}
         }
       })
     },
-    afterLogin(res) {
-      this.logging = false
-      const loginRes = res.data
-      if (loginRes.code >= 0) {
-        const {user, permissions, roles} = loginRes.data
-        this.setUser(user)
-        this.setPermissions(permissions)
-        this.setRoles(roles)
-        setAuthorization({token: loginRes.data.token, expireAt: new Date(loginRes.data.expireAt)})
-        // 获取路由配置
-        getRoutesConfig().then(result => {
-          const routesConfig = result.data.data
-          loadRoutes(routesConfig)
-          this.$router.push('/dashboard/workplace')
-          this.$message.success(loginRes.message, 3)
-        })
+		compareToFirstPassword(rule, value, callback) {
+      const form = this.form;
+      if (value && value !== form.getFieldValue('password')) {
+        callback('两次密码不一致');
       } else {
-        this.error = loginRes.message
+        callback();
       }
-    }
+    },
   }
 }
 </script>

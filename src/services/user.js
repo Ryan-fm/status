@@ -1,4 +1,4 @@
-import {LOGIN, ROUTES} from '@/services/api'
+import {LOGIN, ROUTES,REGISTER} from '@/services/api'
 import {request, METHOD, removeAuthorization} from '@/utils/request'
 
 /**
@@ -11,6 +11,13 @@ export async function login(name, password) {
   return request(LOGIN, METHOD.POST, {
     name: name,
     password: password
+  })
+}
+export async function register(name, password,retype) {
+  return request(REGISTER, METHOD.POST, {
+    name: name,
+    password: password,
+    retype:retype
   })
 }
 
